@@ -5,8 +5,8 @@ import entity.Employe;
 import repository.EmployeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,53 +29,44 @@ public class EmployeService {
     }
 
     // ===== Récupérer un employé par ID =====
-    public Optional<Employe> findById(Integer id) {
-        return repository.findById(id);
+    // Retourne directement l'objet Employe ou null si non trouvé
+    public Employe findById(Integer id) {
+        return repository.findById(id).orElse(null);
     }
 
     // ===== Vérifier si un email existe déjà =====
     public boolean existsByMail(String mail) {
         return repository.findAll().stream()
-                .anyMatch(e -> e.getMail().equalsIgnoreCase(mail));
+                .anyMatch(e -> e.getMail() != null && e.getMail().equalsIgnoreCase(mail));
     }
 
     // ===== Récupérer par id_candidat =====
-    public Optional<Employe> findByIdCandidat(Integer idCandidat) {
+    public Employe findByIdCandidat(Integer idCandidat) {
         return repository.findAll().stream()
                 .filter(e -> e.getIdCandidat() != null && e.getIdCandidat().equals(idCandidat))
-                .findFirst();
+                .findFirst()
+                .orElse(null);
     }
 
-    // ITO MODIFIER
-
-
-    // CORRECTION : Méthode pour trouver les employés sans contrat
+    // ===== Employés sans contrat =====
     public List<Employe> findEmployesSansContrat() {
-        List<Employe> tousLesEmployes = repository.findAll();
-        return tousLesEmployes.stream()
+        return repository.findAll().stream()
                 .filter(employe -> !contratService.existsContratActifByEmploye(employe.getId()))
                 .collect(Collectors.toList());
     }
 
-    // Si vous avez besoin d'une version avec le repository directement :
     public List<Employe> findEmployesSansContratV2() {
-        List<Employe> tousLesEmployes = repository.findAll();
-        return tousLesEmployes.stream()
-                .filter(employe -> {
-                    List<Contrat> contratsActifs = contratService.findContratsActifsByEmploye(employe.getId());
-                    return contratsActifs.isEmpty();
-                })
+        return repository.findAll().stream()
+                .filter(employe -> contratService.findContratsActifsByEmploye(employe.getId()).isEmpty())
                 .collect(Collectors.toList());
     }
 
-    // ==== Statistiques par année de naissance =====
+    // ===== Statistiques =====
     public List<Object[]> getBirthYearStats() {
         return repository.countByBirthYear();
     }
 
-    // ==== Statistiques par année de naissance =====
     public List<Object[]> countByDepartement() {
         return repository.countByDepartement();
     }
-
 }

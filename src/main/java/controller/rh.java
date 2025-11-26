@@ -158,6 +158,15 @@ public class rh {
         return "rh/listeEmploye";  
     }
 
+   @GetMapping("/rh/scoring")
+public String afficherScoring(Model model) {
+    List<Employe> employes = employeService.findAll();
+    model.addAttribute("employes", employes);
+    return "rh/scoring"; 
+}
+  
+
+
 
     // Génération et téléchargement du PDF
     @GetMapping("/rh/candidats/pdf")
@@ -563,6 +572,7 @@ public class rh {
             return "rh/listeEmploye";
         }
     }
+
     
     // AJOUTEZ CES MÉTHODES dans votre contrôleur Rh
     @GetMapping("/rh/contrats")
@@ -589,24 +599,25 @@ public class rh {
         }
     }
 
-    @GetMapping("/rh/contrats/employe")
-    public String contratsParEmploye(@RequestParam("id_employe") Integer idEmploye, Model model) {
-        try {
-            List<ContratEmployeView> contrats = contratEmployeViewService.findByIdEmploye(idEmploye);
-            
-            // Récupérer les infos de base de l'employé depuis le premier contrat
-            Optional<Employe> employe = employeService.findById(idEmploye);
-            
-            model.addAttribute("contrats", contrats);
-            model.addAttribute("employe", employe.orElse(null));
-            
-            return "rh/contratsEmploye";
-            
-        } catch (Exception e) {
-            model.addAttribute("error", "Erreur lors du chargement des contrats de l'employé");
-            return "redirect:/rh/contrats";
-        }
+  @GetMapping("/rh/contrats/employe")
+public String contratsParEmploye(@RequestParam("id_employe") Integer idEmploye, Model model) {
+    try {
+        List<ContratEmployeView> contrats = contratEmployeViewService.findByIdEmploye(idEmploye);
+
+        // Récupérer les infos de base de l'employé
+        Employe employe = employeService.findById(idEmploye);
+
+        model.addAttribute("contrats", contrats);
+        model.addAttribute("employe", employe);
+
+        return "rh/contratsEmploye";
+
+    } catch (Exception e) {
+        model.addAttribute("error", "Erreur lors du chargement des contrats de l'employé");
+        return "redirect:/rh/contrats";
     }
+}
+
 
     @GetMapping("/rh/contrats/search")
     public String searchContrats(@RequestParam(value = "recherche", required = false) String recherche, Model model) {
@@ -746,20 +757,19 @@ private String getFileExtension(String fileName) {
 public String showCreateContratForm(@RequestParam("id_employe") Integer idEmploye, Model model) {
     try {
         System.out.println("=== CRÉATION CONTRAT POUR EMPLOYÉ ID: " + idEmploye + " ===");
-        
+
         // Récupérer l'employé
-        Optional<Employe> employeOpt = employeService.findById(idEmploye);
-        
-        if (employeOpt.isPresent()) {
-            Employe employe = employeOpt.get();
+        Employe employe = employeService.findById(idEmploye);
+
+        if (employe != null) {
             model.addAttribute("employe", employe);
             model.addAttribute("contrat", new Contrat()); // Objet vide pour le formulaire
-            
+
             // Données pour les selects
             model.addAttribute("typesContrat", Arrays.asList("CDI", "CDD", "INTERIM", "APPRENTISSAGE"));
             model.addAttribute("classifications", Arrays.asList("Cadre", "ETAM", "Ouvrier"));
             model.addAttribute("tempsTravail", Arrays.asList("Plein", "Partiel"));
-            
+
             return "rh/creerContrat";
         } else {
             model.addAttribute("error", "Employé non trouvé");
@@ -785,14 +795,13 @@ public String saveContrat(@ModelAttribute Contrat contrat,
         System.out.println("- Salaire base: " + contrat.getSalaireBase());
         
         // Vérifier que l'employé existe
-        Optional<Employe> employeOpt = employeService.findById(idEmploye);
-        if (!employeOpt.isPresent()) {
+        Employe employe = employeService.findById(idEmploye);
+        if (employe == null) {
             System.out.println("❌ Employé non trouvé");
             model.addAttribute("error", "Employé non trouvé");
             return "redirect:/rh/employe";
         }
 
-        Employe employe = employeOpt.get();
         System.out.println("✅ Employé trouvé: " + employe.getPrenom() + " " + employe.getNom());
         
         // Vérifier s'il n'y a pas déjà un contrat actif

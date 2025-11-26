@@ -252,3 +252,12 @@ CREATE TABLE pointage_employe (
     date_saisie TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE evaluation (
+    id BIGSERIAL PRIMARY KEY,
+    mois VARCHAR(255) NOT NULL,
+    note INT NOT NULL,
+    employe_id BIGINT,
+    CONSTRAINT fk_employe
+        FOREIGN KEY (employe_id)
+        REFERENCES employe(id)
+);

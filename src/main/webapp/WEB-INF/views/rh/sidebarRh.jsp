@@ -50,6 +50,13 @@
             </a>
         </div>
         <div class="nav-item">
+            <a href="${pageContext.request.contextPath}/rh/scoring" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                Scoring
+            </a>
+        </div>
+
+        <div class="nav-item">
             <a href="#" class="nav-link active">
                 <i class="fas fa-user-tie"></i>
                 --Congees--
