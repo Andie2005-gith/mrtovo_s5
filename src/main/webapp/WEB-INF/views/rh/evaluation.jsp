@@ -79,6 +79,7 @@
 </head>
 <body>
   <h2>Évaluation de ${employe.nom}</h2>
+  <p style="color: red;">${error}</p>
 
   <form action="${pageContext.request.contextPath}/rh/employe/evaluation/soumettre" method="post">
     <input type="hidden" name="id_employe" value="${employe.id}" />
